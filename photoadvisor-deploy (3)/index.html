@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PhotoAdvisor">
+<title>PhotoAdvisor</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+/* ── DARK THEME (default) ── */
+:root {
+  --bg:   #111;  --bg2: #1c1c1c; --bg3: #252525; --bg4: #303030;
+  --border: rgba(255,255,255,0.13); --border2: rgba(255,255,255,0.25);
+  --text:  #f5f5f5; --text2: #d0d0d0; --text3: #999;
+  --accent:#f7cc3a; --accent-dim:rgba(247,204,58,0.18); --accent-border:rgba(247,204,58,0.5);
+  --blue:#60aaff;   --blue-dim:rgba(96,170,255,0.15);   --blue-border:rgba(96,170,255,0.45);
+  --green:#4ade80;  --green-dim:rgba(74,222,128,0.15);  --green-border:rgba(74,222,128,0.45);
+  --orange:#fb923c; --orange-dim:rgba(251,146,60,0.15); --orange-border:rgba(251,146,60,0.45);
+  --red:#f87171;    --red-dim:rgba(248,113,113,0.15);   --red-border:rgba(248,113,113,0.45);
+  --shadow: rgba(0,0,0,0.4);
+  --r:12px; --rsm:8px;
+}
+/* ── LIGHT THEME ── */
+body.light {
+  --bg:#f0f0f0; --bg2:#ffffff; --bg3:#e8e8e8; --bg4:#dcdcdc;
+  --border:rgba(0,0,0,0.1); --border2:rgba(0,0,0,0.2);
+  --text:#111; --text2:#444; --text3:#777;
+  --accent:#c8960a; --accent-dim:rgba(200,150,10,0.12); --accent-border:rgba(200,150,10,0.4);
+  --blue:#1a6fc4;   --blue-dim:rgba(26,111,196,0.1);   --blue-border:rgba(26,111,196,0.35);
+  --green:#166534;  --green-dim:rgba(22,101,52,0.1);   --green-border:rgba(22,101,52,0.35);
+  --orange:#9a3412; --orange-dim:rgba(154,52,18,0.1);  --orange-border:rgba(154,52,18,0.35);
+  --red:#991b1b;    --red-dim:rgba(153,27,27,0.1);     --red-border:rgba(153,27,27,0.35);
+  --shadow:rgba(0,0,0,0.15);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:-webkit-fill-available;}
+body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;transition:background 0.25s,color 0.25s;}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;height:-webkit-fill-available;max-width:480px;margin:0 auto;padding-top:env(safe-area-inset-top);}
+.header{padding:12px 16px 10px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.logo{width:32px;height:32px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.logo i{font-size:18px;color:#111;}
+.header h1{font-size:18px;font-weight:700;color:var(--text);}
+.header-right{display:flex;align-items:center;gap:8px;}
+.theme-btn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;}
+.cam-pill{display:flex;align-items:center;gap:6px;background:var(--bg3);border:0.5px solid var(--border);border-radius:20px;padding:6px 11px;cursor:pointer;}
+.cam-pill span{font-size:13px;color:var(--text2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cam-pill i{font-size:14px;color:var(--text3);}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.bottom-nav{display:flex;background:var(--bg);border-top:0.5px solid var(--border);flex-shrink:0;padding-bottom:max(14px,env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;cursor:pointer;color:var(--text3);border:none;background:none;font-family:inherit;}
+.nav-btn i{font-size:24px;}
+.nav-btn span{font-size:11px;font-weight:600;}
+.nav-btn.active{color:var(--accent);}
+
+/* ── PANES ── */
+.pane{display:none;padding:14px 14px 24px;}
+.pane.active{display:block;}
+
+/* ── LABELS ── */
+.slabel{font-size:12px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);font-weight:700;margin-bottom:8px;}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+
+/* ── GOLDEN HOUR PANEL ── */
+.gh-panel{background:linear-gradient(135deg,#1a1200 0%,#2d1f00 100%);border:0.5px solid var(--accent-border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+body.light .gh-panel{background:linear-gradient(135deg,#fef9e7 0%,#fef3c7 100%);}
+.gh-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.gh-title{font-size:14px;font-weight:700;color:var(--accent);}
+.gh-location{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px;margin-top:2px;}
+.gh-location i{font-size:13px;color:var(--text3);}
+.gh-refresh{font-size:20px;color:var(--text3);cursor:pointer;padding:2px;}
+.gh-times{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.gh-time{background:rgba(0,0,0,0.25);border-radius:var(--rsm);padding:8px 4px;text-align:center;}
+body.light .gh-time{background:rgba(0,0,0,0.06);}
+.gh-time i{font-size:18px;display:block;margin-bottom:4px;}
+.gh-time .gt-label{font-size:10px;color:var(--text3);margin-bottom:2px;}
+.gh-time .gt-val{font-size:14px;font-weight:700;color:var(--text);}
+.gh-time .gt-sub{font-size:10px;color:var(--text3);}
+.gh-time.active-now{background:var(--accent-dim);border:0.5px solid var(--accent-border);}
+.gh-time.active-now .gt-val{color:var(--accent);}
+.gh-now-badge{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:12px;font-weight:600;color:var(--accent);}
+.gh-now-badge i{font-size:14px;}
+.gh-error{font-size:13px;color:var(--text2);text-align:center;padding:8px 0;}
+.gh-btn{width:100%;margin-top:10px;padding:9px;font-size:13px;font-weight:600;border-radius:var(--rsm);border:0.5px solid var(--accent-border);background:var(--accent-dim);color:var(--accent);cursor:pointer;font-family:inherit;}
+
+/* ── VIEWFINDER ── */
+.viewfinder{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--r);overflow:hidden;margin-bottom:10px;}
+#cameraVideo{width:100%;height:100%;object-fit:cover;display:block;}
+.vf-overlay{position:absolute;inset:0;pointer-events:none;}
+.vf-grid{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;}
+.vf-cell{border:0.5px solid rgba(255,255,255,0.1);}
+.vf-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border:2px solid var(--accent);border-radius:3px;}
+.vf-corner{position:absolute;width:15px;height:15px;border-color:rgba(255,255,255,0.8);border-style:solid;}
+.vf-corner.tl{top:10px;left:10px;border-width:2px 0 0 2px;}
+.vf-corner.tr{top:10px;right:10px;border-width:2px 2px 0 0;}
+.vf-corner.bl{bottom:10px;left:10px;border-width:0 0 2px 2px;}
+.vf-corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0;}
+.vf-top{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;}
+.vf-badge{font-size:12px;font-weight:700;color:rgba(255,255,255,0.95);background:rgba(0,0,0,0.6);padding:4px 10px;border-radius:20px;}
+.vf-badge.live{color:var(--accent);border:1px solid rgba(247,204,58,0.5);}
+.vf-bottom{position:absolute;bottom:10px;left:0;right:0;text-align:center;}
+.vf-lux{font-size:11px;color:rgba(255,255,255,0.55);}
+.vf-no-camera{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,0.4);font-size:14px;text-align:center;padding:1rem;}
+.vf-no-camera i{font-size:40px;}
+
+/* ── ANALYSE BUTTON ── */
+.analyse-btn{width:100%;padding:14px;font-size:16px;font-weight:700;border-radius:var(--r);border:1.5px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px;font-family:inherit;}
+.analyse-btn.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
+
+/* ── STATUS ── */
+.status-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);margin-bottom:8px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.sdot.live{background:var(--green);}
+.sdot.warn{background:var(--orange);}
+
+/* ── SCENE METRICS ── */
+.scene-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.scene-metric{background:var(--bg3);border-radius:var(--rsm);padding:10px 12px;}
+.sm-label{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+.sm-val{font-size:16px;font-weight:700;color:var(--text);}
+.sm-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* ── SETTINGS GRID ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.sc{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rsm);padding:12px;}
+.sc.hi{background:var(--accent-dim);border-color:var(--accent-border);}
+.sc-icon{font-size:18px;color:var(--text3);margin-bottom:4px;}
+.sc.hi .sc-icon{color:var(--accent);}
+.sc-label{font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;font-weight:700;}
+.sc.hi .sc-label{color:var(--accent);opacity:0.8;}
+.sc-val{font-size:20px;font-weight:800;color:var(--text);line-height:1.1;}
+.sc.hi .sc-val{color:var(--accent);}
+.sc-val.sm{font-size:14px;font-weight:700;}
+.sc-why{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.45;}
+.sc.hi .sc-why{color:var(--accent);opacity:0.8;}
+
+/* ── TRIPOD ── */
+.tripod-banner{border-radius:var(--rsm);padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.tripod-banner.needed{background:var(--red-dim);border:0.5px solid var(--red-border);}
+.tripod-banner.helpful{background:var(--orange-dim);border:0.5px solid var(--orange-border);}
+.tripod-banner.fine{background:var(--green-dim);border:0.5px solid var(--green-border);}
+.tripod-banner i{font-size:24px;flex-shrink:0;}
+.tripod-banner.needed i,.tripod-banner.needed .tb-title{color:var(--red);}
+.tripod-banner.helpful i,.tripod-banner.helpful .tb-title{color:var(--orange);}
+.tripod-banner.fine i,.tripod-banner.fine .tb-title{color:var(--green);}
+.tb-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.tb-body{font-size:13px;color:var(--text2);line-height:1.5;}
+
+/* ── FILTERS ── */
+.filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.fc{border-radius:var(--rsm);padding:10px 11px;border:0.5px solid var(--border);background:var(--bg3);}
+.fc.rec{background:var(--green-dim);border-color:var(--green-border);}
+.fc.useful{background:var(--orange-dim);border-color:var(--orange-border);}
+.fc-badge{font-size:10px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px;}
+.fc.rec .fc-badge{color:var(--green);}
+.fc.useful .fc-badge{color:var(--orange);}
+.fc-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.fc-why{font-size:12px;color:var(--text2);line-height:1.4;}
+
+/* ── LENS REC ── */
+.lens-rec-banner{background:var(--blue-dim);border:0.5px solid var(--blue-border);border-radius:var(--rsm);padding:12px 14px;margin-bottom:10px;}
+.lrb-label{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:var(--blue);margin-bottom:5px;font-weight:700;}
+.lrb-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.lrb-why{font-size:13px;color:var(--text2);line-height:1.45;}
+.lrb-focal{font-size:12px;color:var(--blue);margin-top:6px;font-weight:600;}
+
+/* ── TIPS ── */
+.tips-list{list-style:none;}
+.tips-list li{font-size:14px;color:var(--text2);padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;gap:10px;align-items:flex-start;line-height:1.5;}
+.tips-list li:last-child{border-bottom:none;padding-bottom:0;}
+.tips-list li i{color:var(--text2);font-size:16px;margin-top:1px;flex-shrink:0;}
+
+/* ── TAGS ── */
+.tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+.tag{font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border);cursor:pointer;}
+.tag.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border);}
+
+/* ── SLIDERS ── */
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.slider-row label{font-size:13px;font-weight:600;color:var(--text2);width:90px;flex-shrink:0;}
+.slider-row input[type=range]{flex:1;-webkit-appearance:none;height:5px;background:var(--bg4);border-radius:3px;outline:none;}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.sv{font-size:13px;font-weight:700;color:var(--text);min-width:60px;text-align:right;}
+
+/* ── LENSES ── */
+.lens-search{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;margin-bottom:10px;}
+.lens-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.lens-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:11px;cursor:pointer;position:relative;}
+.lens-card.owned{background:var(--blue-dim);border-color:var(--blue-border);}
+.lc-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px;padding-right:22px;}
+.lens-card.owned .lc-name{color:var(--blue);}
+.lc-spec{font-size:11px;color:var(--text3);}
+.lc-type{font-size:10px;background:var(--bg4);color:var(--text3);padding:3px 8px;border-radius:10px;display:inline-block;margin-top:6px;font-weight:600;}
+.lc-check{position:absolute;top:9px;right:9px;font-size:18px;color:var(--blue);}
+.owned-bar{background:var(--blue-dim);border:0.5px solid var(--blue-border);border-radius:var(--rsm);padding:10px 13px;margin-bottom:10px;font-size:13px;color:var(--blue);font-weight:600;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:none;align-items:flex-end;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:18px 16px;padding-bottom:calc(18px + env(safe-area-inset-bottom));width:100%;max-width:480px;margin:0 auto;}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:16px;}
+.modal select{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:12px 14px;font-size:15px;color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;}
+.modal-cam-info{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
+.modal-close{width:100%;padding:14px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);font-size:15px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;}
+
+/* ── LEARN ── */
+.learn-section{margin-bottom:14px;}
+.learn-section h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.learn-section h3 i{color:var(--accent);font-size:20px;}
+.triangle-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.tri-card{background:var(--bg3);border-radius:var(--rsm);padding:12px 8px;text-align:center;}
+.tri-card i{font-size:26px;color:var(--accent);display:block;margin-bottom:7px;}
+.tc-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.tc-desc{font-size:11px;color:var(--text2);line-height:1.45;}
+.scenario-card{background:var(--bg3);border-radius:var(--rsm);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
+.scenario-card i{font-size:20px;color:var(--accent);flex-shrink:0;margin-top:1px;}
+.sc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.sc-settings{font-size:12px;color:var(--text2);line-height:1.5;}
+.minsplit{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:10px;}
+
+/* ── SPLASH ── */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:200;transition:opacity 0.4s;}
+.sp-logo{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;}
+.sp-logo i{font-size:44px;color:#111;}
+#splash h2{font-size:26px;font-weight:800;color:var(--text);}
+#splash p{font-size:15px;color:var(--text2);text-align:center;max-width:260px;line-height:1.65;}
+#splash.hidden{opacity:0;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="sp-logo"><i class="ti ti-aperture"></i></div>
+  <h2>PhotoAdvisor</h2>
+  <p>Point your phone at any scene to get manual settings for your camera</p>
+</div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo"><i class="ti ti-aperture"></i></div>
+      <h1>PhotoAdvisor</h1>
+    </div>
+    <div class="header-right">
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle light/dark mode">
+        <i class="ti ti-sun" id="themeIcon"></i>
+      </button>
+      <div class="cam-pill" onclick="openCameraModal()">
+        <i class="ti ti-camera"></i>
+        <span id="headerCamName">Canon EOS M50</span>
+        <i class="ti ti-chevron-down"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+
+    <!-- ── LIVE ── -->
+    <div class="pane active" id="pane-live">
+
+      <!-- Golden Hour Panel -->
+      <div class="gh-panel" id="ghPanel">
+        <div class="gh-header">
+          <div>
+            <div class="gh-title"><i class="ti ti-clock-hour-4"></i> Golden hour today</div>
+            <div class="gh-location" id="ghLocation"><i class="ti ti-map-pin"></i> <span>Locating…</span></div>
+          </div>
+          <i class="ti ti-refresh gh-refresh" onclick="loadGoldenHour(true)" id="ghRefreshIcon"></i>
+        </div>
+        <div id="ghContent"><div class="gh-error">Tap the refresh icon to load times for your location</div></div>
+      </div>
+
+      <div class="viewfinder">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div class="vf-overlay">
+          <div class="vf-grid">
+            <div class="vf-cell"></div><div class="vf-cell"></div><div class="vf-cell"></div>
+            <div class="vf-cell"></div><div class="vf-cell"></div><div class="vf-cell"></div>
+            <div class="vf-cell"></div><div class="vf-cell"></div><div class="vf-cell"></div>
+          </div>
+          <div class="vf-center"></div>
+          <div class="vf-corner tl"></div><div class="vf-corner tr"></div>
+          <div class="vf-corner bl"></div><div class="vf-corner br"></div>
+          <div class="vf-top">
+            <span class="vf-badge" id="vfScene">—</span>
+            <span class="vf-badge live" id="vfLive" style="display:none;">● LIVE</span>
+            <span class="vf-badge" id="vfEV">EV —</span>
+          </div>
+          <div class="vf-bottom"><div class="vf-lux" id="vfLux"></div></div>
+        </div>
+        <div class="vf-no-camera" id="noCamMsg" style="display:none;">
+          <i class="ti ti-camera-off"></i>
+          <span>Tap Analyse — camera access needed<br>Or use the Manual tab</span>
+        </div>
+      </div>
+
+      <div class="status-row"><div class="sdot" id="sdot"></div><span id="stext">Tap Analyse to read the scene</span></div>
+      <button class="analyse-btn" id="analyseBtn" onclick="toggleCamera()">
+        <i class="ti ti-camera"></i> Analyse scene
+      </button>
+
+      <div id="liveResults" style="display:none;">
+        <div class="slabel">Detected scene</div>
+        <div class="scene-row">
+          <div class="scene-metric"><div class="sm-label">Light level</div><div class="sm-val" id="lLightVal">—</div><div class="sm-sub" id="lLightSub"></div></div>
+          <div class="scene-metric"><div class="sm-label">Conditions</div><div class="sm-val" id="lSceneVal">—</div><div class="sm-sub" id="lSceneSub"></div></div>
+        </div>
+        <div class="slabel">Camera settings — manual mode</div>
+        <div class="settings-grid" id="lSettingsGrid"></div>
+        <div id="lGear"></div>
+        <div class="card"><div class="slabel">Shooting tips</div><ul class="tips-list" id="lTips"></ul></div>
+      </div>
+    </div>
+
+    <!-- ── MANUAL ── -->
+    <div class="pane" id="pane-manual">
+      <div class="card">
+        <div class="slabel" style="margin-bottom:9px;">Light condition</div>
+        <div class="tag-row" id="lightTags">
+          <span class="tag active" onclick="setTag(this,'light','bright_sun')">☀️ Bright sun</span>
+          <span class="tag" onclick="setTag(this,'light','overcast')">🌥 Overcast</span>
+          <span class="tag" onclick="setTag(this,'light','shade')">🌳 Shade</span>
+          <span class="tag" onclick="setTag(this,'light','golden')">🌅 Golden hour</span>
+          <span class="tag" onclick="setTag(this,'light','indoor_bright')">💡 Indoor bright</span>
+          <span class="tag" onclick="setTag(this,'light','indoor_dim')">🕯 Indoor dim</span>
+          <span class="tag" onclick="setTag(this,'light','night')">🌙 Night</span>
+        </div>
+        <div class="slabel" style="margin-bottom:9px;">Subject</div>
+        <div class="tag-row" id="subjectTags">
+          <span class="tag active" onclick="setTag(this,'subject','landscape')">🏔 Landscape</span>
+          <span class="tag" onclick="setTag(this,'subject','portrait')">🧑 Portrait</span>
+          <span class="tag" onclick="setTag(this,'subject','action')">⚡ Action</span>
+          <span class="tag" onclick="setTag(this,'subject','macro')">🔬 Macro</span>
+          <span class="tag" onclick="setTag(this,'subject','street')">🏙 Street</span>
+          <span class="tag" onclick="setTag(this,'subject','night_sky')">🌌 Night sky</span>
+          <span class="tag" onclick="setTag(this,'subject','product')">📦 Product</span>
+        </div>
+        <div class="slider-row"><label>Depth of field</label><input type="range" min="0" max="2" step="1" value="1" id="dofSlider" oninput="recalcManual()"><span class="sv" id="dofVal">Normal</span></div>
+        <div class="slider-row"><label>Motion freeze</label><input type="range" min="0" max="2" step="1" value="1" id="motionSlider" oninput="recalcManual()"><span class="sv" id="motionVal">Normal</span></div>
+      </div>
+      <div id="manualResults" style="display:none;">
+        <div class="slabel">Camera settings — manual mode</div>
+        <div class="settings-grid" id="mSettingsGrid"></div>
+        <div id="mGear"></div>
+        <div class="card"><div class="slabel">Tips</div><ul class="tips-list" id="mTips"></ul></div>
+      </div>
+    </div>
+
+    <!-- ── LENSES ── -->
+    <div class="pane" id="pane-lenses">
+      <div class="card">
+        <p style="font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.6;">Tick the lenses you own. The advisor uses them in recommendations on the Live and Manual tabs.</p>
+        <input class="lens-search" type="text" id="lensSearch" placeholder="Search lenses…" oninput="renderLensGrid()">
+        <div id="ownedBar" style="display:none;" class="owned-bar"></div>
+        <div class="lens-grid" id="lensGrid"></div>
+      </div>
+      <div id="lensDetail"></div>
+    </div>
+
+    <!-- ── LEARN ── -->
+    <div class="pane" id="pane-learn">
+      <div class="card learn-section">
+        <h3><i class="ti ti-triangle"></i> The exposure triangle</h3>
+        <div class="triangle-grid">
+          <div class="tri-card"><i class="ti ti-aperture"></i><div class="tc-name">Aperture</div><div class="tc-desc">Controls light and depth. Low f/1.8 = blur. High f/16 = sharp.</div></div>
+          <div class="tri-card"><i class="ti ti-clock"></i><div class="tc-name">Shutter</div><div class="tc-desc">Controls motion. Fast freezes. Slow blurs or needs tripod.</div></div>
+          <div class="tri-card"><i class="ti ti-cpu"></i><div class="tc-name">ISO</div><div class="tc-desc">Sensor sensitivity. Low = clean. High = grainy but bright.</div></div>
+        </div>
+      </div>
+      <div class="card learn-section">
+        <h3><i class="ti ti-camera"></i> Canon M50 quick guide</h3>
+        <ul class="tips-list">
+          <li><i class="ti ti-settings"></i><span>Mode dial to <strong>M</strong> for full manual control</span></li>
+          <li><i class="ti ti-rotate"></i><span>Main dial (top right) = shutter speed. Hold <strong>Av</strong> + turn = aperture</span></li>
+          <li><i class="ti ti-adjustments"></i><span>Press <strong>Q</strong> for Quick Menu — ISO, white balance, picture style</span></li>
+          <li><i class="ti ti-chart-bar"></i><span>Enable the <strong>histogram</strong> on screen — keep it off both edges</span></li>
+          <li><i class="ti ti-stars"></i><span>M50 is clean at ISO 800–1600. Grain appears above ISO 3200</span></li>
+          <li><i class="ti ti-focus-2"></i><span>Dual Pixel CMOS AF is excellent for video and subject tracking</span></li>
+        </ul>
+      </div>
+      <div class="card learn-section">
+        <h3><i class="ti ti-bulb"></i> Your lenses</h3>
+        <div class="scenario-card"><i class="ti ti-zoom-in"></i><div><div class="sc-name">EF-M 15-45mm f/3.5-6.3 IS STM</div><div class="sc-settings">Kit lens. Best for landscape, travel, street. IS helps hand-holding. Use f/8 in daylight for sharpest results corner to corner.</div></div></div>
+        <div class="scenario-card"><i class="ti ti-aperture"></i><div><div class="sc-name">EF-M 22mm f/2 STM</div><div class="sc-settings">Your fastest lens. Best for low light, street, portrait. At f/2 it gathers 4× more light than the kit lens at f/4. Equivalent to 35mm full frame on the M50.</div></div></div>
+      </div>
+      <div class="card learn-section">
+        <h3><i class="ti ti-sun"></i> Common scenarios</h3>
+        <div class="scenario-card"><i class="ti ti-sun"></i><div><div class="sc-name">Sunny day (Sunny 16 rule)</div><div class="sc-settings">f/16 · 1/100s · ISO 100 — classic starting point in direct sun</div></div></div>
+        <div class="scenario-card"><i class="ti ti-user"></i><div><div class="sc-name">Portrait</div><div class="sc-settings">f/2 (22mm) · 1/200s+ · ISO as low as possible · Blurred background, frozen faces</div></div></div>
+        <div class="scenario-card"><i class="ti ti-run"></i><div><div class="sc-name">Action / sport</div><div class="sc-settings">1/500–1/2000s · Open aperture wide · Raise ISO to compensate</div></div></div>
+        <div class="scenario-card"><i class="ti ti-moon"></i><div><div class="sc-name">Night / low light</div><div class="sc-settings">f/2 (22mm) · 1/30–1/60s · ISO 1600–3200 max · Rest camera on a surface below 1/30s</div></div></div>
+        <div class="scenario-card"><i class="ti ti-mountain"></i><div><div class="sc-name">Landscape</div><div class="sc-settings">f/8–f/11 · 1/125s+ · ISO 100 · Use 15-45mm at widest for sweeping views</div></div></div>
+      </div>
+      <div class="card learn-section">
+        <h3><i class="ti ti-hand-stop"></i> Hand-hold guide (M50)</h3>
+        <div class="minsplit">Minimum safe shutter = 1 ÷ (focal length × 1.6 crop factor)</div>
+        <ul class="tips-list">
+          <li><i class="ti ti-point"></i><span>15mm → min <strong>1/25s</strong> · 22mm → min <strong>1/35s</strong> · 45mm → min <strong>1/75s</strong></span></li>
+          <li><i class="ti ti-point"></i><span>IS on the 15-45mm lens buys you ~3 extra stops — usable down to ~1/6s</span></li>
+          <li><i class="ti ti-point"></i><span>22mm has no IS — tuck elbows in, hold breath, shoot burst</span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-live" onclick="switchTab('live')"><i class="ti ti-camera"></i><span>Live</span></button>
+    <button class="nav-btn" id="nav-manual" onclick="switchTab('manual')"><i class="ti ti-adjustments-horizontal"></i><span>Manual</span></button>
+    <button class="nav-btn" id="nav-lenses" onclick="switchTab('lenses')"><i class="ti ti-circle-dotted"></i><span>Lenses</span></button>
+    <button class="nav-btn" id="nav-learn" onclick="switchTab('learn')"><i class="ti ti-book"></i><span>Learn</span></button>
+  </div>
+</div>
+
+<!-- Camera modal -->
+<div class="modal-overlay" id="camModal" onclick="closeCameraModal(event)">
+  <div class="modal">
+    <div class="modal-title">Select your camera</div>
+    <select id="cameraModel" onchange="onCamChange()">
+      <optgroup label="Canon">
+        <option value="canon_m50" selected>Canon EOS M50</option>
+        <option value="canon_m50ii">Canon EOS M50 Mark II</option>
+        <option value="canon_r50">Canon EOS R50</option>
+        <option value="canon_r8">Canon EOS R8</option>
+        <option value="canon_90d">Canon EOS 90D</option>
+        <option value="canon_r6">Canon EOS R6 Mark II</option>
+      </optgroup>
+      <optgroup label="Sony">
+        <option value="sony_a6400">Sony A6400</option>
+        <option value="sony_a6700">Sony A6700</option>
+        <option value="sony_a7iv">Sony A7 IV</option>
+        <option value="sony_zve10">Sony ZV-E10</option>
+      </optgroup>
+      <optgroup label="Nikon">
+        <option value="nikon_z50">Nikon Z50</option>
+        <option value="nikon_zfc">Nikon Zfc</option>
+        <option value="nikon_z6iii">Nikon Z6 III</option>
+        <option value="nikon_d7500">Nikon D7500</option>
+      </optgroup>
+      <optgroup label="Fujifilm">
+        <option value="fuji_xt5">Fujifilm X-T5</option>
+        <option value="fuji_xs10">Fujifilm X-S10</option>
+      </optgroup>
+      <optgroup label="Other">
+        <option value="generic_apsc">Generic APS-C</option>
+        <option value="generic_ff">Generic Full Frame</option>
+        <option value="generic_mft">Generic Micro 4/3</option>
+      </optgroup>
+    </select>
+    <div class="modal-cam-info" id="modalCamInfo"></div>
+    <button class="modal-close" onclick="closeCameraModal()">Done</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ── CAMERA DB ──────────────────────────────────────────────────────────
+const CAMS={
+  canon_m50:{name:'Canon EOS M50',sensor:'APS-C',crop:1.6,usableISO:3200,mount:'EF-M',ibis:false,notes:'Dual Pixel AF. Clean up to ISO 1600–3200. No IBIS.'},
+  canon_m50ii:{name:'Canon EOS M50 II',sensor:'APS-C',crop:1.6,usableISO:3200,mount:'EF-M',ibis:false,notes:'Improved AF tracking. Same sensor as M50.'},
+  canon_r50:{name:'Canon EOS R50',sensor:'APS-C',crop:1.6,usableISO:6400,mount:'RF',ibis:false,notes:'Better high-ISO than M50. Up to ISO 6400 clean.'},
+  canon_r8:{name:'Canon EOS R8',sensor:'Full Frame',crop:1.0,usableISO:12800,mount:'RF',ibis:false,notes:'Full frame. Excellent low light performance.'},
+  canon_90d:{name:'Canon EOS 90D',sensor:'APS-C',crop:1.6,usableISO:3200,mount:'EF',ibis:false,notes:'Fast burst, reliable dual-pixel AF.'},
+  canon_r6:{name:'Canon EOS R6 II',sensor:'Full Frame',crop:1.0,usableISO:25600,mount:'RF',ibis:true,notes:'Outstanding low light. IBIS + IS. ISO 12800 very clean.'},
+  sony_a6400:{name:'Sony A6400',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'E',ibis:false,notes:'Excellent real-time tracking AF. Usable to ISO 6400.'},
+  sony_a6700:{name:'Sony A6700',sensor:'APS-C',crop:1.5,usableISO:12800,mount:'E',ibis:true,notes:'Best APS-C Sony. IBIS. ISO 6400–12800 clean.'},
+  sony_a7iv:{name:'Sony A7 IV',sensor:'Full Frame',crop:1.0,usableISO:25600,mount:'FE',ibis:true,notes:'Excellent all-rounder. IBIS. ISO 6400–12800 very clean.'},
+  sony_zve10:{name:'Sony ZV-E10',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'E',ibis:false,notes:'Vlog-focused. Great video. Similar sensor to A6400.'},
+  nikon_z50:{name:'Nikon Z50',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'Z',ibis:false,notes:'Excellent image quality. Good to ISO 3200–6400.'},
+  nikon_zfc:{name:'Nikon Zfc',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'Z',ibis:false,notes:'Retro design. Same sensor as Z50.'},
+  nikon_z6iii:{name:'Nikon Z6 III',sensor:'Full Frame',crop:1.0,usableISO:25600,mount:'Z',ibis:true,notes:'Partially stacked sensor. Excellent performance.'},
+  nikon_d7500:{name:'Nikon D7500',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'F',ibis:false,notes:'DSLR. Fast and reliable to ISO 6400.'},
+  fuji_xt5:{name:'Fujifilm X-T5',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'X',ibis:true,notes:'40MP. IBIS. Excellent film simulations.'},
+  fuji_xs10:{name:'Fujifilm X-S10',sensor:'APS-C',crop:1.5,usableISO:6400,mount:'X',ibis:true,notes:'IBIS. Great value. Beginner-friendly controls.'},
+  generic_apsc:{name:'APS-C Camera',sensor:'APS-C',crop:1.6,usableISO:3200,mount:'—',ibis:false,notes:'Typical APS-C performance.'},
+  generic_ff:{name:'Full Frame Camera',sensor:'Full Frame',crop:1.0,usableISO:12800,mount:'—',ibis:false,notes:'Full frame: better low light and dynamic range.'},
+  generic_mft:{name:'Micro 4/3 Camera',sensor:'MFT',crop:2.0,usableISO:3200,mount:'MFT',ibis:true,notes:'Smaller sensor — keep ISO below 3200 for clean results.'}
+};
+
+// ── LENS DB ────────────────────────────────────────────────────────────
+const LENSES=[
+  {id:'efm15-45',name:'EF-M 15-45mm f/3.5-6.3 IS STM',short:'15-45mm f/3.5',mount:'EF-M',maxAp:3.5,is:true,type:'kit zoom',uses:['landscape','travel','street','product','overcast','bright_sun','golden'],notes:'Versatile kit lens with IS. Sharp across the range. Use f/8 for sharpest results.'},
+  {id:'efm22',name:'EF-M 22mm f/2 STM',short:'22mm f/2',mount:'EF-M',maxAp:2.0,is:false,type:'prime',uses:['portrait','street','low_light','indoor_dim','night'],notes:'Pancake prime. Fastest lens for the M50. Excellent low light. 35mm full-frame equivalent.'},
+  {id:'efm32',name:'EF-M 32mm f/1.4 STM',short:'32mm f/1.4',mount:'EF-M',maxAp:1.4,is:false,type:'prime',uses:['portrait','street','low_light'],notes:'Fastest EF-M prime. Gorgeous bokeh. 51mm equivalent.'},
+  {id:'efm55-200',name:'EF-M 55-200mm f/4.5-6.3 IS STM',short:'55-200mm',mount:'EF-M',maxAp:4.5,is:true,type:'telephoto',uses:['wildlife','action','sport','travel'],notes:'Compact telephoto with IS. Great reach for wildlife and events.'},
+  {id:'efm11-22',name:'EF-M 11-22mm f/4-5.6 IS STM',short:'11-22mm f/4',mount:'EF-M',maxAp:4.0,is:true,type:'wide angle',uses:['landscape','architecture','interior'],notes:'Wide angle zoom. Sharp corner-to-corner with IS.'},
+  {id:'rf18-45',name:'RF-S 18-45mm f/4.5-6.3 IS STM',short:'RF-S 18-45mm',mount:'RF',maxAp:4.5,is:true,type:'kit zoom',uses:['landscape','travel','street'],notes:'Kit lens for R50/R8. Light and sharp.'},
+  {id:'rf50',name:'RF 50mm f/1.8 STM',short:'RF 50mm f/1.8',mount:'RF',maxAp:1.8,is:false,type:'prime',uses:['portrait','low_light','street'],notes:'Budget RF prime. Excellent sharpness for the price.'},
+  {id:'e16-55',name:'Sony E 16-55mm f/2.8 G',short:'E 16-55mm f/2.8',mount:'E',maxAp:2.8,is:false,type:'zoom',uses:['landscape','portrait','street'],notes:'Professional standard zoom for Sony APS-C.'},
+  {id:'z-dx16-50',name:'Nikkor Z DX 16-50mm f/3.5 VR',short:'Z 16-50mm',mount:'Z',maxAp:3.5,is:true,type:'kit zoom',uses:['landscape','travel','street'],notes:'Pancake kit for Z50/Zfc. Very portable.'},
+  {id:'xf18-55',name:'Fuji XF 18-55mm f/2.8-4 OIS',short:'XF 18-55mm f/2.8',mount:'X',maxAp:2.8,is:true,type:'zoom',uses:['landscape','portrait','travel'],notes:'Fujifilm kit zoom with wide-aperture advantage.'},
+  {id:'xf35-14',name:'Fuji XF 35mm f/1.4 R',short:'XF 35mm f/1.4',mount:'X',maxAp:1.4,is:false,type:'prime',uses:['street','portrait','low_light'],notes:'Classic Fuji prime. Beloved rendering.'},
+];
+
+// ── PRESETS ────────────────────────────────────────────────────────────
+const PRESETS={
+  bright_sun:{a:'f/8',aI:5,s:'1/500s',sI:2,iso:100,wb:'Daylight (5500K)',ev:'+0',focus:'One Shot AF',drive:'Single',meter:'Evaluative',ha:'f/8 gives sharp depth in bright sun',hs:'1/500s freezes most movement',hi:'ISO 100 for maximum image quality',tips:['Use a lens hood to prevent flare and improve contrast','Check histogram — keep highlights off the right edge','A circular polariser dramatically boosts sky and water colour','Shoot RAW for maximum flexibility in editing']},
+  overcast:{a:'f/5.6',aI:4,s:'1/250s',sI:3,iso:200,wb:'Cloudy (6500K)',ev:'+0.3',focus:'One Shot AF',drive:'Single',meter:'Evaluative',ha:'f/5.6 balances depth of field and light',hs:'1/250s handles gentle movement',hi:'ISO 200 stays clean in soft light',tips:['Overcast is ideal for portraits — soft, even skin tones','Add +0.3 EV to lift shadows','Set white balance to Cloudy (6500K) to add warmth','Great conditions for macro and detail shots']},
+  shade:{a:'f/4',aI:3,s:'1/200s',sI:3,iso:400,wb:'Shade (7500K)',ev:'+0.7',focus:'One Shot AF',drive:'Single',meter:'Evaluative',ha:'f/4 lets in more light in shaded areas',hs:'1/200s is safe for hand-holding',hi:'ISO 400 compensates for shade',tips:['Shade gives cool blue tones — warm up with Shade WB','Expose brighter (+0.7 EV)','Great diffused light for portraits','Watch for dappled light causing uneven exposure']},
+  indoor_bright:{a:'f/4',aI:3,s:'1/125s',sI:4,iso:400,wb:'Auto or 5000K',ev:'-0.3',focus:'One Shot AF',drive:'Single',meter:'Evaluative',ha:'f/4 gathers light with reasonable depth',hs:'1/125s handles gentle movement',hi:'ISO 400 is clean on most cameras indoors',tips:['Use a window as your key light for natural portraits','Watch for mixed colour temperatures — tungsten + daylight','Shoot RAW to fix white balance in post','Try bouncing flash off the ceiling for even coverage']},
+  indoor_dim:{a:'f/2',aI:1,s:'1/60s',sI:5,iso:1600,wb:'Tungsten (3200K)',ev:'+0.7',focus:'Servo/Continuous',drive:'Single',meter:'Spot / Centre-Weighted',ha:'f/2 maximum aperture — gather every bit of light',hs:'1/60s minimum — brace your elbows firmly',hi:'ISO 1600 balances brightness and noise',tips:['Use the 22mm f/2 — it gathers 4× more light than the kit lens at f/4','Brace elbows against your body to reduce camera shake','A small LED panel adds useful fill light','Disable IS only if using a tripod']},
+  golden:{a:'f/8',aI:5,s:'1/200s',sI:3,iso:200,wb:'Shade (7500K)',ev:'+0.3',focus:'One Shot AF',drive:'Burst',meter:'Evaluative',ha:'f/8 keeps the landscape sharp throughout',hs:'1/200s handles gentle motion',hi:'ISO 200 keeps quality high in warm light',tips:['Golden hour lasts only 20–30 minutes — shoot fast','Overexpose slightly (+0.3 EV) to retain shadow detail','Shade white balance enhances warm tones beautifully','Look for long shadows and textured foregrounds']},
+  night:{a:'f/2',aI:1,s:'1/30s',sI:6,iso:3200,wb:'Auto',ev:'+1',focus:'Manual / AF-assist',drive:'Single or Timer',meter:'Spot',ha:'Maximum aperture to gather all available light',hs:'1/30s — brace against a wall or use a tripod',hi:'ISO 3200 near the clean limit on M50',tips:['Use the 22mm f/2 — far better than the kit lens in the dark','Set a 2-second self-timer to avoid shake on pressing the shutter','Consider a small tripod or gorilla pod for stability','Apply noise reduction in post-processing']},
+  night_sky:{a:'f/2',aI:1,s:'20s',sI:8,iso:3200,wb:'Auto',ev:'+1.5',focus:'Manual (infinity)',drive:'Timer + Remote',meter:'Manual',ha:'Widest aperture to capture faint starlight',hs:'500 rule: 500 ÷ (focal length × crop). On 22mm M50 = ~14s max',hi:'ISO 3200 balances star detail and noise on M50',tips:['500 rule for M50 with 22mm: 500 ÷ (22×1.6) ≈ 14s max before star trails','Focus manually on a bright star using live view zoom to 10×','Shoot RAW — astrophoto post-processing recovers extraordinary detail','Use a remote shutter release to eliminate all camera vibration']},
+};
+const APERTURES=['f/1.4','f/1.8','f/2','f/2.8','f/4','f/5.6','f/8','f/11','f/16'];
+const SHUTTERS=['1/2000s','1/1000s','1/500s','1/250s','1/125s','1/60s','1/30s','1/15s','20s'];
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let cameraActive=false,videoStream=null,analysisInterval=null;
+let canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+let ownedLenses=new Set(['efm15-45','efm22']);
+let manualState={light:'bright_sun',subject:'landscape'};
+let lightMode=false;
+
+// ── INIT ───────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  loadState();
+  updateCamInfo();
+  renderLensGrid();
+  recalcManual();
+  loadGoldenHour(false);
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hidden');
+    setTimeout(()=>document.getElementById('splash').remove(),500);
+  },1600);
+});
+
+function saveState(){
+  try{
+    localStorage.setItem('pa_lenses',JSON.stringify([...ownedLenses]));
+    localStorage.setItem('pa_cam',document.getElementById('cameraModel').value);
+    localStorage.setItem('pa_theme',lightMode?'light':'dark');
+  }catch(e){}
+}
+function loadState(){
+  try{
+    let l=JSON.parse(localStorage.getItem('pa_lenses'));
+    if(l) ownedLenses=new Set(l);
+    let c=localStorage.getItem('pa_cam');
+    if(c) document.getElementById('cameraModel').value=c;
+    let t=localStorage.getItem('pa_theme');
+    if(t==='light'){lightMode=true;document.body.classList.add('light');document.getElementById('themeIcon').className='ti ti-moon';}
+  }catch(e){}
+}
+
+// ── THEME ──────────────────────────────────────────────────────────────
+function toggleTheme(){
+  lightMode=!lightMode;
+  document.body.classList.toggle('light',lightMode);
+  document.getElementById('themeIcon').className=lightMode?'ti ti-moon':'ti ti-sun';
+  saveState();
+}
+
+// ── GOLDEN HOUR ────────────────────────────────────────────────────────
+function loadGoldenHour(forceRefresh){
+  let icon=document.getElementById('ghRefreshIcon');
+  icon.style.opacity='0.4';
+  if(!navigator.geolocation){
+    document.getElementById('ghContent').innerHTML='<div class="gh-error">Location not available on this device</div>';
+    icon.style.opacity='1'; return;
+  }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    let lat=pos.coords.latitude, lng=pos.coords.longitude;
+    fetchGoldenHour(lat,lng);
+    reverseGeocode(lat,lng);
+    icon.style.opacity='1';
+  },err=>{
+    document.getElementById('ghContent').innerHTML='<div class="gh-error">Location access denied — tap the refresh icon and allow location when prompted</div><button class="gh-btn" onclick="loadGoldenHour(true)">Allow location access</button>';
+    icon.style.opacity='1';
+  },{timeout:8000});
+}
+
+function reverseGeocode(lat,lng){
+  fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+    .then(r=>r.json())
+    .then(d=>{
+      let city=d.address.city||d.address.town||d.address.village||d.address.county||'Your location';
+      let country=d.address.country_code?d.address.country_code.toUpperCase():'';
+      document.querySelector('#ghLocation span').textContent=city+(country?' · '+country:'');
+    }).catch(()=>{
+      document.querySelector('#ghLocation span').textContent=`${lat.toFixed(2)}°N, ${Math.abs(lng).toFixed(2)}°${lng>=0?'E':'W'}`;
+    });
+}
+
+function fetchGoldenHour(lat,lng){
+  let today=new Date().toISOString().split('T')[0];
+  fetch(`https://api.sunrisesunset.io/json?lat=${lat}&lng=${lng}&date=${today}&timezone=auto`)
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status!=='OK') throw new Error('API error');
+      let r=d.results;
+      renderGoldenHour(r);
+    })
+    .catch(()=>{
+      // Fallback: calculate sunrise/sunset from lat/lng ourselves
+      let times=calcSunTimes(lat,lng,new Date());
+      renderGoldenHourCalc(times);
+    });
+}
+
+function calcSunTimes(lat,lng,date){
+  // Simple sunrise/sunset calculation (Spencer formula approximation)
+  let JD=date.getTime()/86400000+2440587.5;
+  let n=Math.ceil(JD-2451545.0+0.5);
+  let Jstar=n-lng/360;
+  let M=(357.5291+0.98560028*Jstar)%360;
+  let Mr=M*Math.PI/180;
+  let C=1.9148*Math.sin(Mr)+0.0200*Math.sin(2*Mr)+0.0003*Math.sin(3*Mr);
+  let lambda=(M+C+180+102.9372)%360;
+  let lr=lambda*Math.PI/180;
+  let Jt=2451545.0+Jstar+0.0053*Math.sin(Mr)-0.0069*Math.sin(2*lr);
+  let delta=Math.asin(Math.sin(lr)*Math.sin(23.4397*Math.PI/180))*180/Math.PI;
+  let dr=delta*Math.PI/180;
+  let latr=lat*Math.PI/180;
+  let cosOmega=(-Math.sin(-0.833*Math.PI/180)-Math.sin(latr)*Math.sin(dr))/(Math.cos(latr)*Math.cos(dr));
+  if(Math.abs(cosOmega)>1) return null;
+  let omega=Math.acos(cosOmega)*180/Math.PI;
+  let sunrise=(Jt-omega/360-2440587.5)*86400000;
+  let sunset=(Jt+omega/360-2440587.5)*86400000;
+  let offset=date.getTimezoneOffset()*-60000;
+  return{sunrise:new Date(sunrise+offset),sunset:new Date(sunset+offset)};
+}
+
+function fmtTime(d){
+  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function addMins(d,m){return new Date(d.getTime()+m*60000);}
+
+function renderGoldenHour(r){
+  // r has: sunrise, sunset, golden_hour, astronomical_twilight_begin, etc.
+  let now=new Date();
+  let parseT=str=>{
+    let [t,ap]=str.split(' ');let [h,m,s]=t.split(':').map(Number);
+    if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;
+    let d=new Date();d.setHours(h,m,s||0,0);return d;
+  };
+  let sr=parseT(r.sunrise),ss=parseT(r.sunset);
+  let ghMorn=addMins(sr,-30),ghMornEnd=addMins(sr,40);
+  let ghEve=addMins(ss,-40),ghEveEnd=addMins(ss,30);
+  let blueHour=addMins(ss,30),blueEnd=addMins(ss,60);
+
+  let slots=[
+    {icon:'ti-sunrise',label:'Sunrise',val:fmtTime(sr),sub:'Golden starts',color:'#f7cc3a',start:ghMorn,end:ghMornEnd},
+    {icon:'ti-sun',label:'Golden (AM)',val:fmtTime(ghMorn)+'–'+fmtTime(ghMornEnd),sub:'Best morning light',color:'#fb923c',start:ghMorn,end:ghMornEnd},
+    {icon:'ti-sunset',label:'Golden (PM)',val:fmtTime(ghEve)+'–'+fmtTime(ghEveEnd),sub:'Best evening light',color:'#fb923c',start:ghEve,end:ghEveEnd},
+    {icon:'ti-moon',label:'Blue hour',val:fmtTime(blueHour)+'–'+fmtTime(blueEnd),sub:'After sunset',color:'#60aaff',start:blueHour,end:blueEnd},
+  ];
+  let active=slots.find(s=>now>=s.start&&now<=s.end);
+  let html=`<div class="gh-times">`;
+  slots.forEach(s=>{
+    let isActive=active&&active.label===s.label;
+    html+=`<div class="gh-time${isActive?' active-now':''}">
+      <i class="ti ${s.icon}" style="color:${s.color};"></i>
+      <div class="gt-label">${s.label}</div>
+      <div class="gt-val">${s.val.length>7?s.val.split('–')[0]:s.val}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  if(active){
+    let minsLeft=Math.round((active.end-now)/60000);
+    html+=`<div class="gh-now-badge"><i class="ti ti-sparkles"></i> ${active.label} now — ${minsLeft} min remaining</div>`;
+  } else {
+    // Find next slot
+    let next=slots.find(s=>now<s.start);
+    if(next){
+      let minsTo=Math.round((next.start-now)/60000);
+      let hrs=Math.floor(minsTo/60),mins=minsTo%60;
+      html+=`<div class="gh-now-badge" style="color:var(--text3);"><i class="ti ti-clock"></i> Next: ${next.label} in ${hrs>0?hrs+'h ':''}${mins}m</div>`;
+    }
+  }
+  document.getElementById('ghContent').innerHTML=html;
+}
+
+function renderGoldenHourCalc(times){
+  if(!times){document.getElementById('ghContent').innerHTML='<div class="gh-error">Could not calculate times for this location</div>';return;}
+  let {sunrise,sunset}=times;
+  let now=new Date();
+  let ghMorn=addMins(sunrise,-30),ghMornEnd=addMins(sunrise,40);
+  let ghEve=addMins(sunset,-40),ghEveEnd=addMins(sunset,30);
+  let blue=addMins(sunset,30),blueEnd=addMins(sunset,60);
+  let html=`<div class="gh-times">
+    <div class="gh-time"><i class="ti ti-sunrise" style="color:#f7cc3a;"></i><div class="gt-label">Sunrise</div><div class="gt-val">${fmtTime(sunrise)}</div></div>
+    <div class="gh-time"><i class="ti ti-sun" style="color:#fb923c;"></i><div class="gt-label">Golden AM</div><div class="gt-val">${fmtTime(ghMorn)}</div></div>
+    <div class="gh-time"><i class="ti ti-sunset" style="color:#fb923c;"></i><div class="gt-label">Golden PM</div><div class="gt-val">${fmtTime(ghEve)}</div></div>
+    <div class="gh-time"><i class="ti ti-moon" style="color:#60aaff;"></i><div class="gt-label">Blue hour</div><div class="gt-val">${fmtTime(blue)}</div></div>
+  </div>`;
+  let active=now>=ghMorn&&now<=ghMornEnd?'Golden AM':now>=ghEve&&now<=ghEveEnd?'Golden PM':now>=blue&&now<=blueEnd?'Blue hour':null;
+  if(active) html+=`<div class="gh-now-badge"><i class="ti ti-sparkles"></i> ${active} now!</div>`;
+  document.getElementById('ghContent').innerHTML=html;
+}
+
+// ── CAMERA ─────────────────────────────────────────────────────────────
+function getCam(){return CAMS[document.getElementById('cameraModel').value];}
+function updateCamInfo(){
+  let c=getCam();
+  document.getElementById('headerCamName').textContent=c.name;
+  document.getElementById('modalCamInfo').textContent=c.sensor+' · '+c.mount+' mount · Usable ISO ~'+c.usableISO.toLocaleString()+(c.ibis?' · IBIS':'')+' · '+c.notes;
+}
+function onCamChange(){updateCamInfo();if(cameraActive)analyseFrame();recalcManual();saveState();}
+function openCameraModal(){document.getElementById('camModal').classList.add('open');}
+function closeCameraModal(e){if(!e||e.target===document.getElementById('camModal'))document.getElementById('camModal').classList.remove('open');}
+
+async function toggleCamera(){cameraActive?stopCamera():await startCamera();}
+async function startCamera(){
+  try{
+    videoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920}}});
+    let v=document.getElementById('cameraVideo');
+    v.srcObject=videoStream;v.style.display='block';
+    document.getElementById('noCamMsg').style.display='none';
+    cameraActive=true;
+    document.getElementById('analyseBtn').innerHTML='<i class="ti ti-player-stop"></i> Stop analysis';
+    document.getElementById('analyseBtn').classList.add('active');
+    document.getElementById('sdot').className='sdot live';
+    document.getElementById('stext').textContent='Analysing scene…';
+    document.getElementById('vfLive').style.display='block';
+    document.getElementById('liveResults').style.display='block';
+    v.addEventListener('loadedmetadata',()=>{analysisInterval=setInterval(analyseFrame,1500);});
+  }catch(e){
+    document.getElementById('cameraVideo').style.display='none';
+    document.getElementById('noCamMsg').style.display='flex';
+    document.getElementById('sdot').className='sdot warn';
+    document.getElementById('stext').textContent='Camera access denied — use Manual tab';
+  }
+}
+function stopCamera(){
+  if(videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
+  if(analysisInterval){clearInterval(analysisInterval);analysisInterval=null;}
+  cameraActive=false;
+  document.getElementById('analyseBtn').innerHTML='<i class="ti ti-camera"></i> Analyse scene';
+  document.getElementById('analyseBtn').classList.remove('active');
+  document.getElementById('sdot').className='sdot';
+  document.getElementById('stext').textContent='Analysis stopped';
+  document.getElementById('vfLive').style.display='none';
+}
+
+function analyseFrame(){
+  let v=document.getElementById('cameraVideo');
+  if(!v.videoWidth)return;
+  canvas.width=Math.min(v.videoWidth,640);canvas.height=Math.min(v.videoHeight,480);
+  ctx.drawImage(v,0,0,canvas.width,canvas.height);
+  let d=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  let r=0,g=0,b=0,n=0,step=Math.max(4,Math.floor(d.length/4/3000)*4);
+  for(let i=0;i<d.length;i+=step){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}
+  let ar=r/n,ag=g/n,ab=b/n,brightness=(ar*0.299+ag*0.587+ab*0.114);
+  let variance=0;
+  for(let i=0;i<d.length;i+=step){let l=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);variance+=(l-brightness)*(l-brightness);}
+  let contrast=Math.sqrt(variance/n),warmCool=ar-ab;
+  let scene=detectScene(brightness,contrast,warmCool);
+  let cam=getCam(),settings=calcSettings(scene.type,cam);
+  document.getElementById('vfScene').textContent=scene.label;
+  document.getElementById('vfEV').textContent='EV '+settings.ev;
+  document.getElementById('vfLux').textContent='Brightness '+Math.round(brightness)+'/255';
+  document.getElementById('lLightVal').textContent=scene.lightLevel;
+  document.getElementById('lLightSub').textContent=scene.lightSub;
+  document.getElementById('lSceneVal').textContent=scene.label;
+  document.getElementById('lSceneSub').textContent=scene.sub;
+  renderSettings(settings,cam,'lSettingsGrid','lTips');
+  renderGear(settings,cam,scene.type,'lGear');
+}
+
+function detectScene(brightness,contrast,warmCool){
+  let type,lightLevel,lightSub,label,sub;
+  if(brightness>210){lightLevel='Very bright';lightSub='Direct sun or flash';type='bright_sun';}
+  else if(brightness>155){lightLevel='Bright';lightSub='Overcast or open shade';type='overcast';}
+  else if(brightness>100){lightLevel='Medium';lightSub='Indoor bright / window light';type='indoor_bright';}
+  else if(brightness>50){lightLevel='Dim';lightSub='Indoor / artificial light';type='indoor_dim';}
+  else{lightLevel='Low / dark';lightSub='Night or very low light';type='night';}
+  if(warmCool>35){label='Warm scene';sub='Sunset / tungsten lighting';}
+  else if(warmCool<-25){label='Cool / shade';sub='Overcast or shaded area';}
+  else if(contrast>65){label='High contrast';sub='Strong highlights and shadows';}
+  else{label='Balanced scene';sub='Even, diffused lighting';}
+  return{type,lightLevel,lightSub,label,sub};
+}
+function calcSettings(sceneType,cam){
+  let p=JSON.parse(JSON.stringify(PRESETS[sceneType]||PRESETS.overcast));
+  if(p.iso>cam.usableISO){p.iso=cam.usableISO;p.hi='Capped at your camera\'s clean limit (~ISO '+cam.usableISO.toLocaleString()+')';}
+  return p;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────
+function renderSettings(s,cam,gridId,tipsId){
+  document.getElementById(gridId).innerHTML=`
+  <div class="sc hi"><i class="ti ti-aperture sc-icon"></i><div class="sc-label">Aperture</div><div class="sc-val">${s.a}</div><div class="sc-why">${s.ha}</div></div>
+  <div class="sc hi"><i class="ti ti-clock sc-icon"></i><div class="sc-label">Shutter speed</div><div class="sc-val">${s.s}</div><div class="sc-why">${s.hs}</div></div>
+  <div class="sc"><i class="ti ti-cpu sc-icon"></i><div class="sc-label">ISO</div><div class="sc-val">${s.iso.toLocaleString()}</div><div class="sc-why">${s.hi}</div></div>
+  <div class="sc"><i class="ti ti-sun sc-icon"></i><div class="sc-label">White balance</div><div class="sc-val sm">${s.wb}</div><div class="sc-why">Matches light colour temperature</div></div>
+  <div class="sc"><i class="ti ti-focus-2 sc-icon"></i><div class="sc-label">Focus mode</div><div class="sc-val sm">${s.focus}</div><div class="sc-why">${cam.mount==='EF-M'||cam.mount==='RF'?'AF switch on lens barrel':'AF switch on body or lens'}</div></div>
+  <div class="sc"><i class="ti ti-exposure sc-icon"></i><div class="sc-label">Exp. comp.</div><div class="sc-val">${s.ev}</div><div class="sc-why">Fine-tune if result looks off</div></div>
+  <div class="sc"><i class="ti ti-arrows-shuffle sc-icon"></i><div class="sc-label">Drive mode</div><div class="sc-val sm">${s.drive}</div><div class="sc-why">Burst for action, single for stills</div></div>
+  <div class="sc"><i class="ti ti-circles sc-icon"></i><div class="sc-label">Metering</div><div class="sc-val sm">${s.meter}</div><div class="sc-why">How the camera reads the light</div></div>`;
+  document.getElementById(tipsId).innerHTML=s.tips.map(t=>`<li><i class="ti ti-point"></i><span>${t}</span></li>`).join('');
+}
+
+function renderGear(s,cam,sceneType,sectionId){
+  let tripod=getTripod(s,cam);
+  let lensHtml=getLensHtml(sceneType,cam);
+  let filterHtml=getFilterHtml(sceneType);
+  let minNote=`Min hand-hold: 15mm→1/25s · 22mm→1/35s · 45mm→1/75s${cam.ibis?' · IBIS adds ~3 stops':''}`;
+  document.getElementById(sectionId).innerHTML=`
+  <div class="slabel">Tripod</div>
+  <div class="tripod-banner ${tripod.cls}"><i class="ti ti-${tripod.icon}"></i><div><div class="tb-title">${tripod.title}</div><div class="tb-body">${tripod.body}</div></div></div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6;">${minNote}</div>
+  <div class="slabel">Recommended lens</div>
+  ${lensHtml}
+  <div class="slabel">Filters</div>
+  <div class="filter-row">${filterHtml}</div>`;
+}
+
+function getTripod(s,cam){
+  const sMap={'1/2000s':2000,'1/1000s':1000,'1/500s':500,'1/250s':250,'1/125s':125,'1/60s':60,'1/30s':30,'1/15s':15,'20s':0.05};
+  let sv=sMap[s.s]||60,min=cam.ibis?10:60;
+  if(sv<min/4)return{cls:'needed',icon:'alert-triangle',title:'Tripod required',body:'Shutter '+s.s+' is too slow to hand-hold. You\'ll get blur. Use a tripod, gorilla pod, or rest on a firm surface.'};
+  if(sv<min)return{cls:'helpful',icon:'arrows-minimize',title:'Tripod recommended',body:'At '+s.s+' you\'re near the hand-hold limit. A tripod guarantees sharpness.'+(cam.ibis?' Your camera\'s IBIS helps.':'')};
+  return{cls:'fine',icon:'hand-grab',title:'Hand-hold fine',body:'At '+s.s+' you can hand-hold comfortably.'+(cam.ibis?' IBIS gives extra stability.':' Keep elbows tucked in.')};
+}
+
+function getLensHtml(sceneType,cam){
+  let myLenses=LENSES.filter(l=>ownedLenses.has(l.id)&&(l.mount===cam.mount||l.mount==='EF'));
+  if(myLenses.length>0){
+    let best=myLenses.find(l=>l.uses.some(u=>sceneType.includes(u)||u.includes(sceneType)));
+    if(!best)best=myLenses.reduce((a,b)=>a.maxAp<=b.maxAp?a:b);
+    let focal35=Math.round(parseFloat(best.short)*cam.crop);
+    return `<div class="lens-rec-banner"><div class="lrb-label"><i class="ti ti-circle-check"></i> From your bag</div><div class="lrb-name">${best.name}</div><div class="lrb-why">${best.notes}</div><div class="lrb-focal">~${focal35}mm full-frame equivalent on your camera</div></div>`;
+  }
+  return `<div class="lens-rec-banner"><div class="lrb-label">Suggested lens</div><div class="lrb-name">Check Lenses tab</div><div class="lrb-why">Tick your lenses in the Lenses tab for personalised picks.</div></div>`;
+}
+
+const FILTER_PRESETS={
+  bright_sun:[{n:'Circular Polariser (CPL)',w:'Removes reflections, deepens sky blue, boosts colour saturation in foliage and water.',cls:'rec'},{n:'ND Filter (6–10 stop)',w:'For long exposures in bright sun — silky water, open aperture in daylight.',cls:'useful'},{n:'Graduated ND',w:'Balances bright sky vs darker foreground in landscapes.',cls:'useful'},{n:'UV Protective',w:'Protects front element. No optical effect on digital sensors.',cls:'useful'}],
+  overcast:[{n:'UV Protective',w:'Protects front element outdoors.',cls:'useful'},{n:'CPL (reduced effect)',w:'Less effective in overcast light — still cuts some reflections on wet surfaces.',cls:'useful'}],
+  indoor_bright:[{n:'No filters needed',w:'Remove all filters indoors. Every extra piece of glass can reduce sharpness and light.',cls:'rec'}],
+  indoor_dim:[{n:'No filters',w:'Remove all filters. Every piece of glass reduces light to your sensor — critical in dim conditions.',cls:'rec'}],
+  golden:[{n:'Circular Polariser (CPL)',w:'Enhances colour saturation at golden hour. Rotate to taste.',cls:'rec'},{n:'Graduated ND',w:'Tames the bright sky while correctly exposing the foreground.',cls:'rec'},{n:'ND Filter',w:'Long exposures to smooth water or clouds in the scene.',cls:'useful'}],
+  night:[{n:'Remove all filters',w:'In low light, any extra glass reduces light to the sensor. Shoot bare.',cls:'rec'}],
+  night_sky:[{n:'Remove all filters',w:'Any filter reduces faint starlight. Shoot bare for astrophotography.',cls:'rec'},{n:'Light pollution filter',w:'Specialist filter (e.g. Kase, Haida NightSky) that cuts orange city glow. Useful near towns.',cls:'useful'}],
+  shade:[{n:'UV Protective',w:'Protects front element.',cls:'useful'},{n:'CPL',w:'Cuts reflections on wet leaves or water even in shade.',cls:'useful'}],
+  default:[{n:'UV Protective',w:'Protects front element in most conditions.',cls:'useful'}]
+};
+function getFilterHtml(t){
+  return(FILTER_PRESETS[t]||FILTER_PRESETS.default).map(f=>`<div class="fc ${f.cls}">${f.cls==='rec'||f.cls==='useful'?`<div class="fc-badge">${f.cls==='rec'?'Recommended':'Useful'}</div>`:''}<div class="fc-name">${f.n}</div><div class="fc-why">${f.w}</div></div>`).join('');
+}
+
+// ── MANUAL ─────────────────────────────────────────────────────────────
+function setTag(el,group,value){
+  document.querySelectorAll('#'+group+'Tags .tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');manualState[group]=value;recalcManual();
+}
+function recalcManual(){
+  let dof=parseInt(document.getElementById('dofSlider').value);
+  let motion=parseInt(document.getElementById('motionSlider').value);
+  document.getElementById('dofVal').textContent=['Shallow','Normal','Deep'][dof];
+  document.getElementById('motionVal').textContent=['Freeze','Normal','Allow blur'][motion];
+  let cam=getCam(),light=manualState.light||'bright_sun',subject=manualState.subject||'landscape';
+  let sceneKey=subject==='night_sky'?'night_sky':light;
+  let s=JSON.parse(JSON.stringify(PRESETS[sceneKey]||PRESETS.overcast));
+  if(s.iso>cam.usableISO)s.iso=cam.usableISO;
+  let aI=s.aI||5,sI=s.sI||3;
+  if(dof===0)aI=Math.max(0,aI-2);else if(dof===2)aI=Math.min(APERTURES.length-1,aI+2);
+  if(motion===0)sI=Math.max(0,sI-2);else if(motion===2)sI=Math.min(SHUTTERS.length-1,sI+2);
+  if(subject==='portrait'){aI=Math.max(0,Math.min(2,aI));}
+  if(subject==='macro'){aI=Math.max(2,Math.min(5,aI));}
+  if(subject==='action')sI=Math.min(1,sI);
+  if(subject==='night_sky'){aI=Math.min(2,aI);sI=8;}
+  s.a=APERTURES[Math.min(aI,APERTURES.length-1)];
+  s.s=SHUTTERS[Math.min(sI,SHUTTERS.length-1)];
+  s.ha=dof===0?'Wide open — subject isolated, background blurred':dof===2?'Stopped down — sharp from foreground to background':'Balanced depth of field';
+  s.hs=motion===0?'Fast enough to freeze movement cleanly':motion===2?'Slow for motion blur — use a tripod':'Standard for this light level';
+  document.getElementById('manualResults').style.display='block';
+  renderSettings(s,cam,'mSettingsGrid','mTips');
+  renderGear(s,cam,subject!=='landscape'?subject:sceneKey,'mGear');
+}
+
+// ── LENSES ─────────────────────────────────────────────────────────────
+function renderLensGrid(){
+  let cam=getCam(),search=(document.getElementById('lensSearch')||{}).value||'';
+  let visible=LENSES.filter(l=>{
+    let mOk=l.mount===cam.mount||l.mount==='EF'||cam.mount==='—';
+    let sOk=!search||l.name.toLowerCase().includes(search.toLowerCase())||l.short.toLowerCase().includes(search.toLowerCase());
+    return mOk&&sOk;
+  });
+  if(!visible.length)visible=LENSES.filter(l=>!search||l.name.toLowerCase().includes(search.toLowerCase()));
+  document.getElementById('lensGrid').innerHTML=visible.map(l=>`
+  <div class="lens-card${ownedLenses.has(l.id)?' owned':''}" onclick="toggleOwned('${l.id}')">
+    ${ownedLenses.has(l.id)?'<i class="ti ti-circle-check lc-check"></i>':''}
+    <div class="lc-name">${l.name}</div>
+    <div class="lc-spec">f/${l.maxAp} · ${l.is?'IS':'No IS'} · ${l.mount}</div>
+    <div class="lc-type">${l.type}</div>
+  </div>`).join('');
+  let owned=LENSES.filter(l=>ownedLenses.has(l.id));
+  let bar=document.getElementById('ownedBar');
+  if(owned.length){bar.style.display='block';bar.innerHTML='<i class="ti ti-circle-check"></i> Your bag: <strong>'+owned.map(l=>l.short).join(' · ')+'</strong>';}
+  else bar.style.display='none';
+  document.getElementById('lensDetail').innerHTML=owned.length?`<div class="card"><div class="slabel" style="margin-bottom:10px;">Your lenses — tips</div>`+owned.map(l=>`<div class="scenario-card"><i class="ti ti-circle-dotted"></i><div><div class="sc-name">${l.name}</div><div class="sc-settings">${l.notes}<br><span style="color:var(--text3);">Best for: ${l.uses.slice(0,4).join(', ')}</span></div></div></div>`).join('')+'</div>':'';
+}
+function toggleOwned(id){ownedLenses.has(id)?ownedLenses.delete(id):ownedLenses.add(id);renderLensGrid();saveState();}
+
+// ── TABS ───────────────────────────────────────────────────────────────
+function switchTab(t){
+  ['live','manual','lenses','learn'].forEach(n=>{
+    document.getElementById('pane-'+n).classList.toggle('active',n===t);
+    document.getElementById('nav-'+n).classList.toggle('active',n===t);
+  });
+  document.getElementById('mainContent').scrollTop=0;
+  if(t==='manual')recalcManual();
+  if(t==='lenses')renderLensGrid();
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
