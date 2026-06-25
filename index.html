@@ -182,10 +182,10 @@ body.light .gh-time{background:rgba(0,0,0,0.06);}
 .tips-list li:last-child{border-bottom:none;padding-bottom:0;}
 .tips-list li i{color:var(--text2);font-size:16px;margin-top:1px;flex-shrink:0;}
 
-/* TAGS */
-.tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
-.tag{font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border);cursor:pointer;}
-.tag.active{background:var(--orange-dim);color:var(--orange);border-color:var(--orange-border);}
+/* TAGS - uppercase label-caps style */
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.tag{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;border-radius:var(--rsm);background:var(--bg3);color:var(--text3);border:0.5px solid var(--border);cursor:pointer;font-family:var(--font-ui);}
+.tag.active{background:rgba(227,6,19,0.12);color:#fff;border-color:rgba(227,6,19,0.5);}
 
 /* SLIDERS */
 .slider-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
@@ -206,25 +206,28 @@ body.light .gh-time{background:rgba(0,0,0,0.06);}
 .lc-check{position:absolute;top:9px;right:9px;font-size:18px;color:var(--blue);}
 .owned-bar{background:var(--blue-dim);border:0.5px solid var(--blue-border);border-radius:var(--rsm);padding:10px 13px;margin-bottom:10px;font-size:13px;color:var(--blue);font-weight:600;}
 
-/* ── SHOT LOG ── */
+/* ── SHOT LOG - capture history style ── */
 .log-empty{text-align:center;padding:40px 20px;color:var(--text3);}
 .log-empty i{font-size:48px;display:block;margin-bottom:12px;}
 .log-empty p{font-size:14px;line-height:1.6;}
-.log-entry{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;}
-.log-entry-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
-.log-entry-title{font-size:14px;font-weight:700;color:var(--text);}
-.log-entry-time{font-size:11px;color:var(--text3);margin-top:2px;}
+.log-entry{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rsm);padding:14px;margin-bottom:10px;}
+.log-entry-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.log-scene-badge{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:var(--bg4);color:var(--text2);border:0.5px solid var(--border);padding:3px 8px;border-radius:2px;font-family:var(--font-ui);}
+.log-entry-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.log-entry-time{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px;}
 .log-entry-delete{font-size:20px;color:var(--text3);cursor:pointer;padding:2px 4px;flex-shrink:0;}
-.log-settings-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.log-badge{font-size:12px;font-weight:700;background:var(--bg3);color:var(--text2);padding:4px 10px;border-radius:20px;}
-.log-badge.hi{background:var(--accent-dim);color:var(--accent);}
-.log-lens{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px;}
-.log-lens i{font-size:13px;}
-.log-note{font-size:13px;color:var(--text2);margin-top:6px;font-style:italic;line-height:1.5;}
-.log-note-input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:10px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;margin-top:6px;resize:none;}
+/* 3-col settings strip matching design */
+.log-settings-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:10px 12px;margin-bottom:8px;}
+.log-strip-item{}
+.log-strip-label{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;font-family:var(--font-ui);}
+.log-strip-val{font-size:16px;font-weight:600;color:var(--text);font-family:var(--font-mono);}
+.log-extra-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.log-chip{font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;background:var(--bg3);color:var(--text3);border:0.5px solid var(--border);padding:3px 9px;border-radius:2px;font-family:var(--font-ui);}
+.log-note-input{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:10px 12px;font-size:13px;color:var(--text);font-family:var(--font-ui);outline:none;margin-top:4px;resize:none;}
 .log-note-input:focus{border-color:var(--border2);}
-.log-clear-btn{width:100%;padding:11px;font-size:13px;font-weight:600;border-radius:var(--rsm);border:0.5px solid var(--red-border);background:var(--red-dim);color:var(--red);cursor:pointer;font-family:inherit;margin-top:4px;}
-.log-count{font-size:12px;color:var(--text3);margin-bottom:10px;}
+.log-note{font-size:13px;color:var(--text2);margin-top:6px;font-style:italic;line-height:1.5;}
+.log-count{font-size:11px;color:var(--text3);font-family:var(--font-ui);}
+.log-clear-btn{width:100%;padding:11px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:var(--rsm);border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font-ui);margin-top:4px;}
 
 /* ── CHECKLIST ── */
 .checklist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -312,7 +315,7 @@ body.light .gh-time{background:rgba(0,0,0,0.06);}
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v6</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v7</span></h1>
     </div>
     <div class="header-right">
       <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-sun" id="themeIcon"></i></button>
@@ -958,28 +961,42 @@ function renderLog(){
   let count=document.getElementById('logCount');
   let clearBtn=document.getElementById('logClearBtn');
   if(shotLog.length===0){
-    list.innerHTML=`<div class="log-empty"><i class="ti ti-camera-off"></i><p>No shots saved yet.<br>Use the Live or Manual tab to get settings, then tap <strong>"Save this shot setup"</strong>.</p></div>`;
-    count.textContent='';
-    clearBtn.style.display='none';
-    return;
+    list.innerHTML=`<div class="log-empty"><i class="ti ti-camera-off"></i><p>No shots saved yet.<br>Use Live or Manual tab, then tap <strong>"Save this shot setup"</strong>.</p></div>`;
+    count.textContent='';clearBtn.style.display='none';return;
   }
   count.textContent=shotLog.length+' shot'+(shotLog.length!==1?'s':'')+' saved';
   clearBtn.style.display='block';
   list.innerHTML=shotLog.map(e=>`
-  <div class="log-entry" id="entry-${e.id}">
+  <div class="log-entry">
     <div class="log-entry-header">
-      <div><div class="log-entry-title">${e.scene}</div><div class="log-entry-time">${e.time} · ${e.camera}</div></div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span class="log-scene-badge">${e.scene}</span>
+        </div>
+        <div class="log-entry-title">${e.camera}</div>
+        <div class="log-entry-time"><i class="ti ti-clock" style="font-size:11px;"></i>${e.time}</div>
+      </div>
       <span class="log-entry-delete" onclick="deleteShot(${e.id})"><i class="ti ti-x"></i></span>
     </div>
-    <div class="log-settings-row">
-      <span class="log-badge hi">${e.aperture}</span>
-      <span class="log-badge hi">${e.shutter}</span>
-      <span class="log-badge">ISO ${e.iso}</span>
-      <span class="log-badge">${e.wb}</span>
+    <div class="log-settings-strip">
+      <div class="log-strip-item">
+        <div class="log-strip-label">Aperture</div>
+        <div class="log-strip-val">${e.aperture}</div>
+      </div>
+      <div class="log-strip-item">
+        <div class="log-strip-label">Shutter</div>
+        <div class="log-strip-val">${e.shutter}</div>
+      </div>
+      <div class="log-strip-item">
+        <div class="log-strip-label">ISO</div>
+        <div class="log-strip-val">${e.iso}</div>
+      </div>
     </div>
-    <div class="log-lens"><i class="ti ti-circle-dotted"></i>${e.lens}</div>
-    ${e.note?`<div class="log-note">"${e.note}"</div>`:''}
-    <textarea class="log-note-input" placeholder="Add a note about this shot…" onchange="updateNote(${e.id},this.value)">${e.note||''}</textarea>
+    <div class="log-extra-row">
+      <span class="log-chip"><i class="ti ti-circle-dotted"></i> ${e.lens}</span>
+      <span class="log-chip">${e.wb}</span>
+    </div>
+    <textarea class="log-note-input" placeholder="Add a note about this shot…" rows="2" onchange="updateNote(${e.id},this.value)">${e.note||''}</textarea>
   </div>`).join('');
 }
 function deleteShot(id){shotLog=shotLog.filter(e=>e.id!==id);saveState();renderLog();}
