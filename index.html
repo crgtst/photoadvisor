@@ -67,9 +67,9 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .toggle-switch.on .toggle-knob{transform:translateX(18px);}
 .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
 .bottom-nav{display:flex;background:var(--bg);border-top:0.5px solid var(--border);flex-shrink:0;padding-bottom:max(14px,env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;cursor:pointer;color:var(--text3);border:none;background:none;font-family:inherit;position:relative;}
-.nav-btn i{font-size:22px;}
-.nav-btn span{font-size:10px;font-weight:600;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;cursor:pointer;color:var(--text3);border:none;background:none;font-family:inherit;position:relative;}
+.nav-btn i{font-size:20px;}
+.nav-btn span{font-size:9px;font-weight:600;}
 .nav-btn.active{color:var(--text);}
 .nav-btn.active::before{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent);}
 .pane{display:none;padding:14px 14px 24px;}
@@ -397,7 +397,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v16</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v17</span></h1>
     </div>
     <div class="header-right">
       <button class="settings-cog" onclick="openSettings()" aria-label="Settings">
@@ -793,6 +793,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
     <button class="nav-btn" id="nav-lenses" onclick="switchTab('lenses')"><i class="ti ti-circle-dotted"></i><span>Lenses</span></button>
     <button class="nav-btn" id="nav-sun" onclick="switchTab('sun')"><i class="ti ti-sun"></i><span>Sun</span></button>
     <button class="nav-btn" id="nav-log" onclick="switchTab('log')"><i class="ti ti-history"></i><span>Log</span></button>
+    <button class="nav-btn" id="nav-learn" onclick="switchTab('learn')"><i class="ti ti-book"></i><span>Learn</span></button>
   </div>
 </div>
 
@@ -1672,7 +1673,7 @@ function updateSunArc(sr,ss){
 
 // ── TABS ──────────────────────────────────────────────────────────────
 function switchTab(t){
-  ['live','manual','lenses','sun','log','check'].forEach(n=>{
+  ['live','manual','lenses','sun','log','learn'].forEach(n=>{
     let p=document.getElementById('pane-'+n);
     let b=document.getElementById('nav-'+n);
     if(p) p.classList.toggle('active',n===t);
