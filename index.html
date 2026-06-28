@@ -96,7 +96,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .vf-corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0;}
 .vf-top{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;}
 .vf-badge{font-size:12px;font-weight:700;color:rgba(255,255,255,0.95);background:rgba(0,0,0,0.6);padding:4px 10px;border-radius:20px;}
-.vf-badge.live{color:var(--accent);border:1px solid rgba(247,204,58,0.5);}
+.vf-badge.live{color:var(--accent);border:1px solid rgba(227,6,19,0.5);}
 .vf-bottom{position:absolute;bottom:10px;left:0;right:0;text-align:center;}
 .vf-lux{font-size:11px;color:rgba(255,255,255,0.55);}
 .vf-no-camera{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,0.4);font-size:14px;text-align:center;padding:1rem;}
@@ -371,7 +371,6 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .sun-rating-val.fair{color:var(--text2);}
 .sun-rating-val.poor{color:var(--text3);}
 .sun-rating-sub{font-size:13px;color:var(--text2);line-height:1.5;}
-.sun-check-btn{width:100%;padding:13px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:var(--rsm);border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--font-ui);display:flex;align-items:center;justify-content:center;gap:8px;}
 
 /* ── HISTOGRAM ── */
 .histo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
@@ -397,7 +396,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v17</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v18</span></h1>
     </div>
     <div class="header-right">
       <button class="settings-cog" onclick="openSettings()" aria-label="Settings">
@@ -457,6 +456,15 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
       </div>
 
       <button class="modal-close" onclick="closeSettings()" style="margin-top:16px;">Done</button>
+
+      <div class="settings-section-label" style="margin-top:20px;">Pre-shoot checklist</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--text3);" id="checkSubtitle">Tap each item when done</div>
+        <span class="checklist-reset" onclick="resetChecklist()">Reset</span>
+      </div>
+      <div class="checklist-progress" style="margin-bottom:10px;"><div class="checklist-progress-bar" id="checkProgress" style="width:0%"></div></div>
+      <div class="checklist-done-banner" id="checkDoneBanner"><i class="ti ti-circle-check"></i> All good — you're ready to shoot!</div>
+      <div id="checkItems"></div>
     </div>
   </div>
 
@@ -627,8 +635,6 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
       </div>
 
       <!-- Checklist link -->
-      <button class="sun-check-btn" onclick="switchTab('check')"><i class="ti ti-checklist"></i> Open pre-shoot checklist</button>
-
     </div>
 
     <!-- SHOT LOG -->
@@ -645,21 +651,6 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
     </div>
 
     <!-- CHECKLIST -->
-    <div class="pane" id="pane-check">
-      <div class="card">
-        <div class="checklist-header">
-          <div>
-            <div class="slabel" style="margin-bottom:2px;">Pre-shoot checklist</div>
-            <div style="font-size:12px;color:var(--text3);" id="checkSubtitle">Tap each item when done</div>
-          </div>
-          <span class="checklist-reset" onclick="resetChecklist()">Reset</span>
-        </div>
-        <div class="checklist-progress"><div class="checklist-progress-bar" id="checkProgress" style="width:0%"></div></div>
-        <div class="checklist-done-banner" id="checkDoneBanner"><i class="ti ti-circle-check"></i> All good — you're ready to shoot!</div>
-        <div id="checkItems"></div>
-      </div>
-    </div>
-
     <!-- LEARN -->
     <div class="pane" id="pane-learn">
 
@@ -957,6 +948,7 @@ function onCamChange(){updateCamInfo();if(cameraActive)analyseFrame();recalcManu
 function openSettings(){
   updateCamInfo();
   updateToggleUI();
+  renderChecklist();
   document.getElementById('settingsModal').classList.add('open');
 }
 function closeSettings(e){
@@ -1683,9 +1675,8 @@ function switchTab(t){
   if(t==='manual') recalcManual();
   if(t==='lenses') renderLensGrid();
   if(t==='log') renderLog();
-  if(t==='check') renderChecklist();
   if(t==='sun') loadSunData();
-  if(t==='learn') showHisto(document.querySelector('.histo-tab'),'good');
+  if(t==='learn') setTimeout(()=>{let btn=document.querySelector('.histo-tab');if(btn)showHisto(btn,'good');},50);
 }
 
 if('serviceWorker' in navigator){
