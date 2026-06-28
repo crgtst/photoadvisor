@@ -241,6 +241,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .log-note{font-size:13px;color:var(--text2);margin-top:6px;font-style:italic;line-height:1.5;}
 .log-count{font-size:11px;color:var(--text3);font-family:var(--font-ui);}
 .log-clear-btn{width:100%;padding:11px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:var(--rsm);border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font-ui);margin-top:4px;}
+.log-share-btn{width:100%;margin-top:8px;padding:9px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:var(--rsm);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font-ui);display:flex;align-items:center;justify-content:center;gap:6px;}
 
 /* ── CHECKLIST ── */
 .checklist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -372,6 +373,14 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 .sun-rating-sub{font-size:13px;color:var(--text2);line-height:1.5;}
 .sun-check-btn{width:100%;padding:13px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-radius:var(--rsm);border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--font-ui);display:flex;align-items:center;justify-content:center;gap:8px;}
 
+/* ── HISTOGRAM ── */
+.histo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.histo-tab{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:5px 12px;border-radius:var(--rsm);border:0.5px solid var(--border);background:var(--bg3);color:var(--text3);cursor:pointer;font-family:var(--font-ui);}
+.histo-tab.active{background:var(--accent-dim);color:var(--accent);border-color:var(--accent-border);}
+.histo-display{background:var(--bg3);border-radius:var(--rsm);padding:12px;}
+.histo-desc{font-size:13px;color:var(--text);font-weight:600;margin-bottom:4px;}
+.histo-fix{font-size:12px;color:var(--text2);line-height:1.5;}
+
 /* SPLASH */
 #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:200;transition:opacity 0.4s;}
 .sp-logo{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;}
@@ -388,7 +397,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v15</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v16</span></h1>
     </div>
     <div class="header-right">
       <button class="settings-cog" onclick="openSettings()" aria-label="Settings">
@@ -756,6 +765,22 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
           <li><i class="ti ti-point"></i><span>IS on the 15-45mm buys ~3 extra stops — usable to ~1/6s</span></li>
           <li><i class="ti ti-point"></i><span>22mm has no IS — tuck elbows in, hold breath, shoot burst</span></li>
         </ul>
+      </div>
+
+      <div class="slabel" style="margin-top:4px;">Histogram guide</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;">Tap a histogram type to see what it means and how to fix it.</p>
+        <div class="histo-tabs">
+          <button class="histo-tab active" onclick="showHisto(this,'good')">Good</button>
+          <button class="histo-tab" onclick="showHisto(this,'over')">Overexposed</button>
+          <button class="histo-tab" onclick="showHisto(this,'under')">Underexposed</button>
+          <button class="histo-tab" onclick="showHisto(this,'contrast')">High contrast</button>
+        </div>
+        <div class="histo-display">
+          <svg id="histoSvg" viewBox="0 0 280 80" style="width:100%;margin-bottom:10px;"></svg>
+          <div class="histo-desc" id="histoDesc"></div>
+          <div class="histo-fix" id="histoFix"></div>
+        </div>
       </div>
 
     </div>
@@ -1144,12 +1169,26 @@ function saveShot(source){
     wb:currentSettings.wb,
     lens:lensName,
     camera:cam.name,
+    location:'',
     note:''
   };
   shotLog.unshift(entry);
   saveState();
   renderLog();
   switchTab('log');
+  // Try to get location in background
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`)
+        .then(r=>r.json()).then(d=>{
+          let city=d.address.city||d.address.town||d.address.village||d.address.county||'';
+          let cc=d.address.country_code?d.address.country_code.toUpperCase():'';
+          let loc=city+(cc?' · '+cc:'');
+          let e=shotLog.find(e=>e.id===entry.id);
+          if(e){e.location=loc;saveState();renderLog();}
+        }).catch(()=>{});
+    },()=>{},{timeout:5000});
+  }
 }
 function renderLog(){
   let list=document.getElementById('logList');
@@ -1169,7 +1208,7 @@ function renderLog(){
           <span class="log-scene-badge">${e.scene}</span>
         </div>
         <div class="log-entry-title">${e.camera}</div>
-        <div class="log-entry-time"><i class="ti ti-clock" style="font-size:11px;"></i>${e.time}</div>
+        <div class="log-entry-time"><i class="ti ti-clock" style="font-size:11px;"></i>${e.time}${e.location?` · <i class="ti ti-map-pin" style="font-size:11px;"></i>${e.location}`:''}</div>
       </div>
       <span class="log-entry-delete" onclick="deleteShot(${e.id})"><i class="ti ti-x"></i></span>
     </div>
@@ -1192,11 +1231,70 @@ function renderLog(){
       <span class="log-chip">${e.wb}</span>
     </div>
     <textarea class="log-note-input" placeholder="Add a note about this shot…" rows="2" onchange="updateNote(${e.id},this.value)">${e.note||''}</textarea>
+    <button class="log-share-btn" onclick="shareShot(${e.id})"><i class="ti ti-share"></i> Share setup</button>
   </div>`).join('')+'</div>';
 }
 function deleteShot(id){shotLog=shotLog.filter(e=>e.id!==id);saveState();renderLog();}
 function updateNote(id,val){let e=shotLog.find(e=>e.id===id);if(e){e.note=val;saveState();}}
 function clearLog(){if(confirm('Clear all saved shots?')){shotLog=[];saveState();renderLog();}}
+function shareShot(id){
+  let e=shotLog.find(e=>e.id===id);
+  if(!e) return;
+  let text=`📷 ${e.camera}\n🎬 ${e.scene}\n\nf-stop: ${e.aperture}\nShutter: ${e.shutter}\nISO: ${e.iso}\nWhite balance: ${e.wb}\nLens: ${e.lens}${e.location?'\nLocation: '+e.location:''}${e.note?'\n\n"'+e.note+'"':''}\n\n— via PhotoAdvisor`;
+  if(navigator.share){
+    navigator.share({title:'Shot setup — PhotoAdvisor',text}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>alert('Shot setup copied to clipboard!')).catch(()=>alert(text));
+  }
+}
+
+// ── HISTOGRAM ─────────────────────────────────────────────────────────
+const HISTOS={
+  good:{
+    bars:[2,4,8,15,25,38,50,55,52,48,44,38,30,22,15,10,7,5,3,2],
+    color:'#4ade80',
+    desc:'Well exposed — good histogram',
+    fix:'The curve is spread across the middle with no clipping at either edge. Shadows have detail, highlights aren\'t blown. This is what you\'re aiming for.'
+  },
+  over:{
+    bars:[1,2,3,5,8,12,18,25,35,48,58,65,70,72,75,78,80,82,85,95],
+    color:'#e30613',
+    desc:'Overexposed — highlights clipped',
+    fix:'The curve is piled up against the right edge — blown highlights you can\'t recover. Fix: reduce exposure compensation (EV -0.3 to -1), use a faster shutter speed, or narrow your aperture.'
+  },
+  under:{
+    bars:[90,82,70,58,48,38,28,20,14,10,7,5,4,3,2,2,1,1,1,1],
+    color:'#60aaff',
+    desc:'Underexposed — shadows clipped',
+    fix:'The curve is piled against the left edge — crushed blacks with no shadow detail. Fix: increase EV (+0.3 to +1), use a slower shutter speed, wider aperture, or higher ISO.'
+  },
+  contrast:{
+    bars:[45,40,30,18,8,4,3,4,5,4,3,4,5,8,15,25,35,42,48,50],
+    color:'#ff9500',
+    desc:'High contrast — peaks at both ends',
+    fix:'Two peaks at the edges mean very bright highlights and very dark shadows with little midtone detail. Common in harsh sunlight. Fix: shoot in shade, use fill flash, or bracket exposures and merge in post.'
+  }
+};
+function showHisto(btn,type){
+  document.querySelectorAll('.histo-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  let h=HISTOS[type];
+  let svg=document.getElementById('histoSvg');
+  let w=280,height=80,barW=w/h.bars.length,max=Math.max(...h.bars);
+  svg.innerHTML=`<rect x="0" y="0" width="${w}" height="${height}" fill="none"/>
+  <line x1="0" y1="${height}" x2="${w}" y2="${height}" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+  <line x1="0" y1="0" x2="0" y2="${height}" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+  <line x1="${w}" y1="0" x2="${w}" y2="${height}" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+  <text x="0" y="${height-2}" fill="rgba(255,255,255,0.25)" font-size="8" font-family="JetBrains Mono,monospace">Shadows</text>
+  <text x="${w}" y="${height-2}" fill="rgba(255,255,255,0.25)" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="end">Highlights</text>`+
+  h.bars.map((v,i)=>{
+    let bh=(v/max)*(height-4);
+    let x=i*barW;
+    return `<rect x="${x+0.5}" y="${height-bh}" width="${barW-1}" height="${bh}" fill="${h.color}" opacity="0.75" rx="1"/>`;
+  }).join('');
+  document.getElementById('histoDesc').textContent=h.desc;
+  document.getElementById('histoFix').textContent=h.fix;
+}
 
 // ── CHECKLIST ─────────────────────────────────────────────────────────
 function renderChecklist(){
@@ -1318,6 +1416,36 @@ function applyTriSettings(){
 }
 
 // ── LENSES ────────────────────────────────────────────────────────────
+// ── LENS SVG DIAGRAMS ─────────────────────────────────────────────────
+function lensSVG(l){
+  let isPrime=l.type==='prime'||l.type==='wide angle';
+  let isZoom=l.type.includes('zoom')||l.type==='telephoto'||l.type==='superzoom';
+  let isTele=l.type==='telephoto'||l.type==='superzoom';
+  let c='#ff9500';
+  if(isPrime) return `<svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="14" width="28" height="16" rx="2" fill="none" stroke="${c}" stroke-width="1.5"/>
+    <rect x="16" y="10" width="12" height="4" rx="1" fill="none" stroke="${c}" stroke-width="1.2"/>
+    <circle cx="22" cy="22" r="6" fill="none" stroke="${c}" stroke-width="1.2"/>
+    <circle cx="22" cy="22" r="3" fill="${c}" opacity="0.4"/>
+    <line x1="8" y1="22" x2="36" y2="22" stroke="${c}" stroke-width="0.5" opacity="0.3"/>
+  </svg>`;
+  if(isTele) return `<svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="17" width="20" height="10" rx="1.5" fill="none" stroke="${c}" stroke-width="1.5"/>
+    <rect x="24" y="14" width="14" height="16" rx="2" fill="none" stroke="${c}" stroke-width="1.5"/>
+    <rect x="24" y="18" width="14" height="8" rx="1" fill="${c}" opacity="0.1"/>
+    <circle cx="31" cy="22" r="5" fill="none" stroke="${c}" stroke-width="1.2"/>
+    <circle cx="31" cy="22" r="2.5" fill="${c}" opacity="0.4"/>
+  </svg>`;
+  return `<svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="15" width="32" height="14" rx="2" fill="none" stroke="${c}" stroke-width="1.5"/>
+    <rect x="12" y="11" width="10" height="4" rx="1" fill="none" stroke="${c}" stroke-width="1.2"/>
+    <circle cx="22" cy="22" r="5.5" fill="none" stroke="${c}" stroke-width="1.2"/>
+    <circle cx="22" cy="22" r="2.5" fill="${c}" opacity="0.4"/>
+    <line x1="6" y1="19" x2="38" y2="19" stroke="${c}" stroke-width="0.5" opacity="0.25"/>
+  </svg>`;
+}
+
+// ── LENS GRID ─────────────────────────────────────────────────────────
 function renderLensGrid(){
   let cam=getCam(),search=(document.getElementById('lensSearch')||{}).value||'';
   let owned=LENSES.filter(l=>ownedLenses.has(l.id));
@@ -1327,7 +1455,7 @@ function renderLensGrid(){
     bagEl.innerHTML=`<div class="slabel">Your bag — ${owned.length} lens${owned.length!==1?'es':''}</div>`+
     owned.map(l=>`
     <div class="lens-bag-card owned">
-      <div class="lens-bag-icon"><i class="ti ti-circle-dotted"></i></div>
+      <div class="lens-bag-icon">${lensSVG(l)}</div>
       <div class="lens-bag-info">
         <div class="lens-bag-type">${l.type}</div>
         <div class="lens-bag-name">${l.name}</div>
@@ -1556,6 +1684,7 @@ function switchTab(t){
   if(t==='log') renderLog();
   if(t==='check') renderChecklist();
   if(t==='sun') loadSunData();
+  if(t==='learn') showHisto(document.querySelector('.histo-tab'),'good');
 }
 
 if('serviceWorker' in navigator){
