@@ -399,7 +399,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v19</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v20</span></h1>
     </div>
     <div class="header-right">
       <button class="settings-cog" onclick="openSettings()" aria-label="Settings">
@@ -1612,11 +1612,12 @@ function buildSunScreen(sr,ss){
   // Rating
   let now=new Date();
   let rating,ratingClass,ratingSub;
+  let isDay=now>sr&&now<ss;
   if((now>=goldAmStart&&now<=goldAmEnd)||(now>=goldPmStart&&now<=goldPmEnd)){
-    rating='Golden Hour';ratingClass='excellent';ratingSub='Perfect light for photography. Warm, directional, low contrast — shoot now.';
+    rating='Golden hour';ratingClass='excellent';ratingSub='Perfect light for photography. Warm, directional, low contrast — shoot now.';
   } else if((now>=blueAmStart&&now<=blueAmEnd)||(now>=bluePmStart&&now<=bluePmEnd)){
-    rating='Blue Hour';ratingClass='good';ratingSub='Cool, even light with a beautiful blue cast. Great for cityscapes and architecture.';
-  } else if(now>goldAmEnd&&now<goldPmStart){
+    rating='Blue hour';ratingClass='good';ratingSub='Cool, even light with a beautiful blue cast. Great for cityscapes and architecture.';
+  } else if(isDay){
     let noon=new Date(sr.getTime()+(ss.getTime()-sr.getTime())/2);
     let distFromNoon=Math.abs(now-noon)/3600000;
     if(distFromNoon<2){rating='Harsh midday sun';ratingClass='poor';ratingSub='High contrast, hard shadows. Best avoided for portraits. Try shade or wait for later.';}
