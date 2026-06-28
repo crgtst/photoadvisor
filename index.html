@@ -291,8 +291,11 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:none;align-items:flex-end;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:18px 16px;padding-bottom:calc(18px + env(safe-area-inset-bottom));width:100%;max-width:480px;margin:0 auto;}
-.modal-title{font-size:17px;font-weight:800;margin-bottom:16px;}
+.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;margin:0 auto;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-header{padding:18px 16px 12px;flex-shrink:0;}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:0;}
+.modal-body{flex:1;overflow-y:auto;padding:0 16px;-webkit-overflow-scrolling:touch;}
+.modal-footer{padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));flex-shrink:0;border-top:0.5px solid var(--border);}
 .modal select{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:12px 14px;font-size:15px;color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;}
 .modal-cam-info{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
 .modal-close{width:100%;padding:14px;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);font-size:15px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;}
@@ -396,7 +399,7 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <div class="header">
     <div class="header-left">
       <div class="logo"><i class="ti ti-aperture"></i></div>
-      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v18</span></h1>
+      <h1>PhotoAdvisor <span style="font-size:10px;font-weight:500;color:var(--text3);vertical-align:middle;">v19</span></h1>
     </div>
     <div class="header-right">
       <button class="settings-cog" onclick="openSettings()" aria-label="Settings">
@@ -408,63 +411,70 @@ body{height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--
   <!-- Settings sheet -->
   <div class="modal-overlay" id="settingsModal" onclick="closeSettings(event)">
     <div class="modal">
-      <div class="modal-title">Settings</div>
-
-      <div class="settings-section-label">Camera</div>
-      <select id="cameraModel" onchange="onCamChange()" style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--rsm);padding:12px 14px;font-size:15px;color:var(--text);font-family:var(--font-ui);outline:none;margin-bottom:16px;">
-        <optgroup label="Canon">
-          <option value="canon_m50" selected>Canon EOS M50</option>
-          <option value="canon_m50ii">Canon EOS M50 Mark II</option>
-          <option value="canon_r50">Canon EOS R50</option>
-          <option value="canon_r8">Canon EOS R8</option>
-          <option value="canon_90d">Canon EOS 90D</option>
-          <option value="canon_r6">Canon EOS R6 Mark II</option>
-        </optgroup>
-        <optgroup label="Sony">
-          <option value="sony_a6400">Sony A6400</option>
-          <option value="sony_a6700">Sony A6700</option>
-          <option value="sony_a7iv">Sony A7 IV</option>
-          <option value="sony_zve10">Sony ZV-E10</option>
-        </optgroup>
-        <optgroup label="Nikon">
-          <option value="nikon_z50">Nikon Z50</option>
-          <option value="nikon_zfc">Nikon Zfc</option>
-          <option value="nikon_z6iii">Nikon Z6 III</option>
-          <option value="nikon_d7500">Nikon D7500</option>
-        </optgroup>
-        <optgroup label="Fujifilm">
-          <option value="fuji_xt5">Fujifilm X-T5</option>
-          <option value="fuji_xs10">Fujifilm X-S10</option>
-        </optgroup>
-        <optgroup label="Other">
-          <option value="generic_apsc">Generic APS-C</option>
-          <option value="generic_ff">Generic Full Frame</option>
-          <option value="generic_mft">Generic Micro 4/3</option>
-        </optgroup>
-      </select>
-      <div class="modal-cam-info" id="modalCamInfo"></div>
-
-      <div class="settings-section-label" style="margin-top:16px;">Appearance</div>
-      <div class="settings-toggle-row" onclick="toggleTheme()">
-        <div>
-          <div class="settings-toggle-label">Dark mode</div>
-          <div class="settings-toggle-sub">Switch between dark and light theme</div>
-        </div>
-        <div class="toggle-switch" id="themeToggle">
-          <div class="toggle-knob"></div>
-        </div>
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
       </div>
 
-      <button class="modal-close" onclick="closeSettings()" style="margin-top:16px;">Done</button>
+      <div class="modal-body">
+        <div class="settings-section-label" style="margin-top:4px;">Camera</div>
+        <select id="cameraModel" onchange="onCamChange()">
+          <optgroup label="Canon">
+            <option value="canon_m50" selected>Canon EOS M50</option>
+            <option value="canon_m50ii">Canon EOS M50 Mark II</option>
+            <option value="canon_r50">Canon EOS R50</option>
+            <option value="canon_r8">Canon EOS R8</option>
+            <option value="canon_90d">Canon EOS 90D</option>
+            <option value="canon_r6">Canon EOS R6 Mark II</option>
+          </optgroup>
+          <optgroup label="Sony">
+            <option value="sony_a6400">Sony A6400</option>
+            <option value="sony_a6700">Sony A6700</option>
+            <option value="sony_a7iv">Sony A7 IV</option>
+            <option value="sony_zve10">Sony ZV-E10</option>
+          </optgroup>
+          <optgroup label="Nikon">
+            <option value="nikon_z50">Nikon Z50</option>
+            <option value="nikon_zfc">Nikon Zfc</option>
+            <option value="nikon_z6iii">Nikon Z6 III</option>
+            <option value="nikon_d7500">Nikon D7500</option>
+          </optgroup>
+          <optgroup label="Fujifilm">
+            <option value="fuji_xt5">Fujifilm X-T5</option>
+            <option value="fuji_xs10">Fujifilm X-S10</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option value="generic_apsc">Generic APS-C</option>
+            <option value="generic_ff">Generic Full Frame</option>
+            <option value="generic_mft">Generic Micro 4/3</option>
+          </optgroup>
+        </select>
+        <div class="modal-cam-info" id="modalCamInfo"></div>
 
-      <div class="settings-section-label" style="margin-top:20px;">Pre-shoot checklist</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:12px;color:var(--text3);" id="checkSubtitle">Tap each item when done</div>
-        <span class="checklist-reset" onclick="resetChecklist()">Reset</span>
+        <div class="settings-section-label">Appearance</div>
+        <div class="settings-toggle-row" onclick="toggleTheme()">
+          <div>
+            <div class="settings-toggle-label">Dark mode</div>
+            <div class="settings-toggle-sub">Switch between dark and light theme</div>
+          </div>
+          <div class="toggle-switch" id="themeToggle">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+
+        <div class="settings-section-label" style="margin-top:20px;">Pre-shoot checklist</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:12px;color:var(--text3);" id="checkSubtitle">Tap each item when done</div>
+          <span class="checklist-reset" onclick="resetChecklist()">Reset</span>
+        </div>
+        <div class="checklist-progress" style="margin-bottom:10px;"><div class="checklist-progress-bar" id="checkProgress" style="width:0%"></div></div>
+        <div class="checklist-done-banner" id="checkDoneBanner"><i class="ti ti-circle-check"></i> All good — you're ready to shoot!</div>
+        <div id="checkItems"></div>
+        <div style="height:8px;"></div>
       </div>
-      <div class="checklist-progress" style="margin-bottom:10px;"><div class="checklist-progress-bar" id="checkProgress" style="width:0%"></div></div>
-      <div class="checklist-done-banner" id="checkDoneBanner"><i class="ti ti-circle-check"></i> All good — you're ready to shoot!</div>
-      <div id="checkItems"></div>
+
+      <div class="modal-footer">
+        <button class="modal-close" onclick="closeSettings()">Done</button>
+      </div>
     </div>
   </div>
 
